@@ -55,6 +55,11 @@ function normalizeColumnName(name) {
   return String(name).trim().split('.').pop();
 }
 
+// Compatibility helper
+function coalesce(value, fallback) {
+    return (value === undefined || value === null) ? fallback : value;
+  }
+
 class MySqliteRequest {
   constructor() {
     // Query state
@@ -162,7 +167,7 @@ class MySqliteRequest {
       const row = { id: i };
 
       headers.forEach((h, idx) => {
-        row[h] = values[idx] ?? '';
+        row[h] = coalesce(values[idx], '');
       });
 
       rows.push(row);
@@ -177,7 +182,7 @@ class MySqliteRequest {
     const outLines = [];
     outLines.push(headers.map(toCsvField).join(','));
     for (const r of rows) {
-      outLines.push(headers.map(h => toCsvField(r[h] ?? '')).join(','));
+        outLines.push(headers.map(h => toCsvField(coalesce(r[h], ''))).join(','));
     }
     fs.writeFileSync(filename, outLines.join('\n') + '\n', 'utf8');
   }
@@ -243,7 +248,7 @@ class MySqliteRequest {
       if (headers.length === 0) throw new Error('Cannot insert into empty table without header.');
 
       // Build a row in header order, and write CSV-safe fields
-      const newRowLine = headers.map(h => toCsvField(this.insertData[h] ?? '')).join(',');
+      const newRowLine = headers.map(h => toCsvField(coalesce(this.insertData[h], ''))).join(',');
 
       // Ensure we append on a new line correctly
       const existing = fs.readFileSync(this.tableName, 'utf8');

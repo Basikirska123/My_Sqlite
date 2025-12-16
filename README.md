@@ -2,7 +2,7 @@
 ***
 
 ## Task
-The goal of this project is to build a lightweight SQLite-like engine using JavaScript.
+The goal of this project is to build a simple SQLite-like engine using JavaScript.
 
 The challenge is to:
 Read and write data from CSV files;

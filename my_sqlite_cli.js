@@ -2,6 +2,11 @@ const readline = require('readline');
 const fs = require('fs');
 const MySqliteRequest = require('./my_sqlite_request');
 
+// Compatibility helper
+function coalesce(value, fallback) {
+    return (value === undefined || value === null) ? fallback : value;
+}
+
 //Remove surrounding quotes from a value
 function stripQuotes(str) {
   str = str.trim();
@@ -20,7 +25,7 @@ function printSelectResult(rows) {
 
   const columns = Object.keys(rows[0]).filter(c => c !== 'id');
   rows.forEach(r => {
-    console.log(columns.map(c => r[c] ?? '').join('|'));
+    console.log(columns.map(c => coalesce(r[c], '')).join('|'));
   });
 }
 
@@ -67,7 +72,7 @@ function handleCommand(line) {
 
     const headers = fs.readFileSync(table, 'utf8').split('\n')[0].split(',');
     const data = {};
-    headers.forEach((h, i) => data[h] = values[i] ?? '');
+    headers.forEach((h, i) => data[h] = coalesce(values[i], ''));
 
     new MySqliteRequest().insert(table).values(data).run();
     return;
